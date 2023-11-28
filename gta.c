@@ -283,8 +283,8 @@ struct Car {
 };
 
 void car_init(struct Car* car) {
-    car->x = 100;
-    car->y = 113;
+    car->x = 200;
+    car->y = 213;
     car->border = 40;
     car->frame = 0;
     car->move = 0;
@@ -380,7 +380,7 @@ int main() {
         *bg0_x_scroll = xscroll;
         sprite_update_all();
         
-        delay(300);
+        delay(200);
     }
 }
 
