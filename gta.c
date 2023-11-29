@@ -225,7 +225,6 @@ struct Car {
     struct Sprite* sprite;
     int x, y;
     int frame;
-    int animation_delay;
     int counter;
     int move;
     int border;
@@ -237,8 +236,6 @@ void car_init(struct Car* car, int x, int y) {
     car->border = 40;
     car->frame = 0;
     car->move = 0;
-    car->counter = 0;
-    car->animation_delay = 8;
     car->sprite = sprite_init(car->x, car->y, SIZE_16_32, 0, 0, car->frame, 0);
 }
 
@@ -295,14 +292,10 @@ void car_stop(struct Car* car) {
 
 void car_update(struct Car* car) {
     if (car->move) {
-        car->counter++;
-        if (car->counter >= car->animation_delay) {
-            car->frame = car->frame + 16;
-            if (car->frame > 16) {
-                car->frame = 0;
-            }
-            sprite_set_offset(car->sprite, car->frame);
-            car->counter = 0;
+         car->frame = car->frame + 16;
+         if (car->frame > 16) {
+             car->frame = 0;
+             sprite_set_offset(car->sprite, car->frame);
         }
     }
     sprite_position(car->sprite, car->x, car->y);
@@ -323,7 +316,7 @@ int main() {
     struct Car redcar;
     car_init(&redcar, 100, 100);
     struct Car greencar;
-    car_init(&greencar, 120, 112);
+    car_init(&greencar, 45, 120);
 
     int xscroll = 0;
 
