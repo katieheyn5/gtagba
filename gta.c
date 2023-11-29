@@ -120,13 +120,12 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
     int h = horizontal_flip ? 1 : 0;
     int v = vertical_flip ? 1 : 0;
 
-    /* set up the first attribute */
-    sprites[index].attribute0 = y |             /* y coordinate */
-        (0 << 8) |          /* rendering mode */
-        (0 << 10) |         /* gfx mode */
-        (0 << 12) |         /* mosaic */
-        (1 << 13) |         /* color mode, 0:16, 1:256 */
-        (shape_bits << 14); /* shape */
+    sprites[index].attribute0 = y |             
+        (0 << 8) |          
+        (0 << 10) |         
+        (0 << 12) |         
+        (1 << 13) |         
+        (shape_bits << 14);
 
     sprites[index].attribute1 = x |             
         (0 << 9) |         
@@ -337,14 +336,19 @@ int main() {
             if (car_right(currentcar)) {
                 xscroll++;
             }
+            car_right(&policecar);
         } else if (button_pressed(BUTTON_LEFT)) {
             if (car_left(currentcar)) {
                 xscroll--;
             }
+            //right instead of left bc the police wants to catch the car
+            car_right(&policecar);
         } else if (button_pressed(BUTTON_UP)) {
             car_up(currentcar);
+            car_up(&policecar);
         } else if (button_pressed(BUTTON_DOWN)) { 
             car_down(currentcar);
+            car_down(&policecar);
         } else {
             car_stop(currentcar);
         }
