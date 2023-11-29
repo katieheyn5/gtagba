@@ -1,7 +1,6 @@
 #include "gta_map.h"
 #include "background.h"
-#include "redcar.h"
-#include "greencar.h"
+#include "cars.h"
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
@@ -127,7 +126,7 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
         (0 << 10) |         /* gfx mode */
         (0 << 12) |         /* mosaic */
         (1 << 13) |         /* color mode, 0:16, 1:256 */
-        (shape_bits << 15); /* shape */
+        (shape_bits << 14); /* shape */
 
     sprites[index].attribute1 = x |             
         (0 << 9) |         
@@ -174,9 +173,9 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 }
 
 void setup_sprite_image() {
-    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) redcar_palette, PALETTE_SIZE);
+    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) cars_palette, PALETTE_SIZE);
 
-    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) redcar_data, (redcar_width * redcar_height) / 2);
+    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) cars_data, (cars_width * cars_height) / 2);
 }
 
 unsigned char button_pressed(unsigned short button) {
@@ -230,13 +229,13 @@ struct Car {
     int border;
 };
 
-void car_init(struct Car* car, int x, int y) {
+void car_init(struct Car* car, int x, int y, int frame) {
     car->x = x;
     car->y = y;
     car->border = 40;
-    car->frame = 0;
+    car->frame = frame;
     car->move = 0;
-    car->sprite = sprite_init(car->x, car->y, SIZE_16_32, 0, 0, car->frame, 0);
+    car->sprite = sprite_init(car->x, car->y, SIZE_32_16, 0, 0, car->frame, 0);
 }
 
 int car_left(struct Car* car) {
@@ -314,15 +313,18 @@ int main() {
     sprite_clear();
 
     struct Car redcar;
-    car_init(&redcar, 100, 100);
+    car_init(&redcar, 100, 100, 0);
     struct Car greencar;
-    car_init(&greencar, 45, 120);
+    car_init(&greencar, 45, 120, 16);
+    struct Car policecar;
+    car_init(&policecar, 45, 90, 32);
 
     int xscroll = 0;
 
     while (1) {
         car_update(&redcar);
         car_update(&greencar);
+        car_update(&policecar);
 
         if (button_pressed(BUTTON_RIGHT)) {
             if (car_right(&redcar)) {
