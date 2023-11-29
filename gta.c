@@ -249,7 +249,6 @@ void car_init(struct Car* car) {
 }
 
 int car_left(struct Car* car) {
-    sprite_set_horizontal_flip(car->sprite, 1);
     car->move = 1;
 
     if (car->x < car->border) {
@@ -261,13 +260,34 @@ int car_left(struct Car* car) {
 }
 
 int car_right(struct Car* car) {
-    sprite_set_horizontal_flip(car->sprite, 0);
     car->move = 1;
 
     if (car->x > (SCREEN_WIDTH - 16 - car->border)) {
         return 1;
     } else {
         car->x++;
+        return 0;
+    }
+}
+
+int car_up(struct Car* car) {
+   car->move = 1;
+
+    if (car->y > (SCREEN_HEIGHT - 16 - car->border)) {
+        return 1;
+    } else {
+        car->y++;
+        return 0;
+    } 
+}
+
+int car_down(struct Car* car) {
+    car->move = 1;
+
+    if (car->y < car->border) {
+        return 1;
+    } else {
+        car->y--;
         return 0;
     }
 }
@@ -319,6 +339,10 @@ int main() {
             if (car_left(&car)) {
                 xscroll--;
             }
+        } else if (button_pressed(BUTTON_UP)) {
+            car_up(&car);
+        } else if (button_pressed(BUTTON_DOWN)) { 
+            car_down(&car);
         } else {
             car_stop(&car);
         }
