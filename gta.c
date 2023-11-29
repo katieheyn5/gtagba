@@ -318,6 +318,7 @@ int main() {
     car_init(&greencar, 45, 120, 16);
     struct Car policecar;
     car_init(&policecar, 45, 90, 32);
+    struct Car *currentcar = &redcar;
 
     int xscroll = 0;
 
@@ -326,22 +327,28 @@ int main() {
         car_update(&greencar);
         car_update(&policecar);
 
+        if(button_pressed(BUTTON_A)){
+            currentcar = &greencar;
+        }
+        else if(button_pressed(BUTTON_B)){
+            currentcar = &redcar;
+        }        
         if (button_pressed(BUTTON_RIGHT)) {
-            if (car_right(&redcar)) {
+            if (car_right(currentcar)) {
                 xscroll++;
             }
         } else if (button_pressed(BUTTON_LEFT)) {
-            if (car_left(&redcar)) {
+            if (car_left(currentcar)) {
                 xscroll--;
             }
         } else if (button_pressed(BUTTON_UP)) {
-            car_up(&redcar);
+            car_up(currentcar);
         } else if (button_pressed(BUTTON_DOWN)) { 
-            car_down(&redcar);
+            car_down(currentcar);
         } else {
-            car_stop(&redcar);
+            car_stop(currentcar);
         }
-        
+
         wait_vblank();
         *bg0_x_scroll = xscroll;
         sprite_update_all();
