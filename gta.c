@@ -173,12 +173,9 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
     sprite->attribute2 |= (offset & 0x03ff);
 }
 
-//void setup_sprite_image(const unsigned short* car_palette, const unsigned char* car_data) {
 void setup_sprite_image() {
-    /* load the palette from the image into palette memory*/
     memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) redcar_palette, PALETTE_SIZE);
 
-    /* load the image into sprite image memory */
     memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) redcar_data, (redcar_width * redcar_height) / 2);
 }
 
@@ -270,10 +267,10 @@ int car_right(struct Car* car) {
 int car_up(struct Car* car) {
    car->move = 1;
 
-    if (car->y > (SCREEN_HEIGHT - 16 - car->border)) {
+    if (car->y < car->border) {
         return 1;
     } else {
-        car->y++;
+        car->y--;
         return 0;
     } 
 }
@@ -281,10 +278,10 @@ int car_up(struct Car* car) {
 int car_down(struct Car* car) {
     car->move = 1;
 
-    if (car->y < car->border) {
+    if (car->y > (SCREEN_HEIGHT - 16 - car->border)) {
         return 1;
     } else {
-        car->y--;
+        car->y++;
         return 0;
     }
 }
@@ -343,9 +340,9 @@ int main() {
                 xscroll--;
             }
         } else if (button_pressed(BUTTON_UP)) {
-            car_up(&car);
+            car_up(&redcar);
         } else if (button_pressed(BUTTON_DOWN)) { 
-            car_down(&car);
+            car_down(&redcar);
         } else {
             car_stop(&redcar);
         }
