@@ -265,9 +265,9 @@ int car_right(struct Car* car) {
 }
 
 int car_up(struct Car* car) {
-   car->move = 1;
+   car->move = 1; 
 
-    if (car->y < car->border) {
+    if (car->y < ((car->border) - 15)) {
         return 1;
     } else {
         car->y--;
