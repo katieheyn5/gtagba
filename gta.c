@@ -1,6 +1,7 @@
 #include "gta_map.h"
 #include "background.h"
-#include "car.h"
+#include "redcar.h"
+#include "greencar.h"
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
@@ -81,7 +82,6 @@ void memcpy16_dma(unsigned short* dest, unsigned short* source, int amount) {
 void wait_vblank() {volatile unsigned short* sprite_palette = (volatile unsigned short*) 0x5000200;
     while (*scanline_counter < 160) { }
 }
-
 struct Sprite {
     unsigned short attribute0;
     unsigned short attribute1;
@@ -139,7 +139,7 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
         (0 << 10) |         /* gfx mode */
         (0 << 12) |         /* mosaic */
         (1 << 13) |         /* color mode, 0:16, 1:256 */
-        (shape_bits << 14); /* shape */
+        (shape_bits << 15); /* shape */
 
     /* set up the second attribute */
     sprites[index].attribute1 = x |             /* x coordinate */
@@ -198,15 +198,6 @@ void sprite_move(struct Sprite* sprite, int dx, int dy) {
     sprite_position(sprite, x + dx, y + dy);
 }
 
-void sprite_set_horizontal_flip(struct Sprite* sprite, int horizontal_flip) {
-    if (horizontal_flip) {
-        /* set the bit */
-        sprite->attribute1 |= 0x1000;
-    } else {
-        /* clear the bit */
-        sprite->attribute1 &= 0xefff;
-    }
-}
 
 void sprite_set_offset(struct Sprite* sprite, int offset) {
     /* clear the old offset */
@@ -216,12 +207,13 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
     sprite->attribute2 |= (offset & 0x03ff);
 }
 
+//void setup_sprite_image(const unsigned short* car_palette, const unsigned char* car_data) {
 void setup_sprite_image() {
     /* load the palette from the image into palette memory*/
-    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) car_palette, PALETTE_SIZE);
+    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) redcar_palette, PALETTE_SIZE);
 
     /* load the image into sprite image memory */
-    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) car_data, (car_width * car_height) / 2);
+    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) redcar_data, (redcar_width * redcar_height) / 2);
 }
 
 unsigned char button_pressed(unsigned short button) {
@@ -282,9 +274,9 @@ struct Car {
     int border;
 };
 
-void car_init(struct Car* car) {
-    car->x = 100;
-    car->y = 113;
+void car_init(struct Car* car, int x, int y) {
+    car->x = x;
+    car->y = y;
     car->border = 40;
     car->frame = 0;
     car->move = 0;
@@ -295,7 +287,6 @@ void car_init(struct Car* car) {
 
 int car_left(struct Car* car) {
     /* face left */
-    sprite_set_horizontal_flip(car->sprite, 1);
     car->move = 1;
 
     /* if we are at the left end, just scroll the screen */
@@ -310,7 +301,6 @@ int car_left(struct Car* car) {
 
 int car_right(struct Car* car) {
     /* face right */
-    sprite_set_horizontal_flip(car->sprite, 0);
     car->move = 1;
 
     /* if we are at the right end, just scroll the screen */
@@ -355,32 +345,38 @@ int main() {
 
     setup_background();
     
-    struct Car car;
-    car_init(&car);
+    setup_sprite_image();
+    sprite_clear();
+
+    struct Car redcar;
+    car_init(&redcar, 100, 100);
+    struct Car greencar;
+    car_init(&greencar, 120, 112);
 
     int xscroll = 0;
 
     while (1) {
-        car_update(&car);
+        car_update(&redcar);
+        car_update(&greencar);
 
         /* now the arrow keys move the car */
         if (button_pressed(BUTTON_RIGHT)) {
-            if (car_right(&car)) {
+            if (car_right(&redcar)) {
                 xscroll++;
             }
         } else if (button_pressed(BUTTON_LEFT)) {
-            if (car_left(&car)) {
+            if (car_left(&redcar)) {
                 xscroll--;
             }
         } else {
-            car_stop(&car);
+            car_stop(&redcar);
         }
         
         wait_vblank();
         *bg0_x_scroll = xscroll;
         sprite_update_all();
         
-        delay(300);
+        delay(100);
     }
 }
 
