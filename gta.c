@@ -391,12 +391,12 @@ int main() {
     sprite_clear();
 
     struct Car redcar;
-    car_init(&redcar, 100, 100, 0);
+    car_init(&redcar, 120, 80, 0);
     struct Car greencar;
-    car_init(&greencar, 45, 120, 16);
+    car_init(&greencar, 45, 25, 16);
     struct Car policecar;
-    car_init(&policecar, 45, 90, 32);
-    struct Car *currentcar = &greencar;
+    car_init(&policecar, 10, 90, 32);
+    struct Car *currentcar = &redcar;
 
     int xscroll = 0;
 
