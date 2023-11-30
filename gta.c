@@ -1,6 +1,7 @@
 #include "gta_map.h"
 #include "background.h"
 #include "cars.h"
+#include "text.h"
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
@@ -28,6 +29,7 @@ volatile unsigned short* bg3_control = (volatile unsigned short*) 0x400000e;
 
 volatile unsigned long* display_control = (volatile unsigned long*) 0x4000000;
 volatile unsigned short* bg_palette = (volatile unsigned short*) 0x5000000;
+volatile unsigned short* bgtext_palette = (volatile unsigned short*) 0x5000000;
 volatile unsigned short* buttons = (volatile unsigned short*) 0x04000130;
 
 volatile short* bg0_x_scroll = (unsigned short*) 0x4000010;
@@ -199,23 +201,37 @@ void setup_background() {
         bg_palette[i] = background_palette[i];
     }
 
+    for (int i = 0; i < PALETTE_SIZE; i++) {
+        bgtext_palette[i] = text_palette[i];
+    }
+
     volatile unsigned short* dest = char_block(0);
+    volatile unsigned short* dest1 = char_block(1);
+    
     unsigned short* image = (unsigned short*) background_data;
     for (int i = 0; i < ((background_width * background_height) / 2); i++) {
         dest[i] = image[i];
     }
 
-    *bg0_control = 0 |   
+
+    *bg0_control = 1 |   
         (0 << 2)  |       
         (0 << 6)  |       
         (1 << 7)  |       
         (16 << 8) |       
         (1 << 13) |      
         (0 << 14); 
+    
+    *bg1_control = 0 | (1 << 2) | (0 << 6) | (1 << 7) | (24 << 8) | (1 <<     13) | (0 << 14);
 
     dest = screen_block(16);
     for (int i = 0; i < (gta_map_width * gta_map_height); i++) {
         dest[i] = gta_map[i];
+    }
+    
+    dest1 = screen_block(24);
+    for (int i = 0; i < 32; i++) {
+        dest1[i] = 0;   
     }
 }
 
@@ -382,10 +398,10 @@ void delay(unsigned int amount) {
 }
 
 int main() {
-    *display_control = MODE0 | BG0_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;    
+    *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;    
 
     setup_background();
-    char text [32] = "Lives: ";
+    char text [8] = "Lives: ";
     set_text(text, 0,0);    
     setup_sprite_image();
     sprite_clear();
