@@ -362,6 +362,21 @@ void check(struct Car* policecar, struct Car* currentcar){
     
 }
 
+void set_text(char* str, int row, int col) {                    
+    int index = row * 32 + col;
+
+    int missing = 32; 
+
+    volatile unsigned short* ptr = screen_block(24);
+
+    while (*str) {
+        ptr[index] = *str - missing;
+
+        index++;
+        str++;
+    }   
+}
+
 void delay(unsigned int amount) {
     for (int i = 0; i < amount * 10; i++);
 }
@@ -370,7 +385,8 @@ int main() {
     *display_control = MODE0 | BG0_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;    
 
     setup_background();
-    
+    char text [32] = "Lives: ";
+    set_text(text, 0,0);    
     setup_sprite_image();
     sprite_clear();
 
