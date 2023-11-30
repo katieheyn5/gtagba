@@ -224,7 +224,7 @@ struct Car {
     int x, y;
     int frame;
     int counter;
-    int move;
+    float move;
     int border;
 };
 
@@ -237,7 +237,7 @@ void car_init(struct Car* car, int x, int y, int frame) {
     car->sprite = sprite_init(car->x, car->y, SIZE_32_16, 0, 0, car->frame, 0);
 }
 
-int car_left(struct Car* car) {
+int policecar_left(struct Car* car) {
     car->move = 1;
 
     if (car->x < car->border) {
@@ -248,8 +248,30 @@ int car_left(struct Car* car) {
     }
 }
 
-int car_right(struct Car* car) {
+int car_left(struct Car* car) {
+    car->move = 2;
+
+    if (car->x < car->border) {
+        return 1;
+    } else {
+        car->x--;
+        return 0;
+    }
+}
+
+int policecar_right(struct Car* car) {
     car->move = 1;
+
+    if (car->x > (SCREEN_WIDTH - 16 - car->border)) {
+        return 1;
+    } else {
+        car->x++;
+        return 0;
+    }
+}
+
+int car_right(struct Car* car) {
+    car->move = 2;
 
     if (car->x > (SCREEN_WIDTH - 16 - car->border)) {
         return 1;
@@ -283,20 +305,61 @@ int car_down(struct Car* car) {
 
 void car_stop(struct Car* car) {
     car->move = 0;
-    car->frame = 0;
     car->counter = 7;
     sprite_set_offset(car->sprite, car->frame);
 }
 
 void car_update(struct Car* car) {
-    if (car->move) {
-         car->frame = car->frame + 16;
-         if (car->frame > 16) {
-             car->frame = 0;
-             sprite_set_offset(car->sprite, car->frame);
-        }
-    }
     sprite_position(car->sprite, car->x, car->y);
+}
+
+void move_police(struct Car* policecar, struct Car* currentcar){
+    int policex = policecar->x;
+    if (((currentcar->x) > policex) & (currentcar->x > 120)){
+        policecar_right(policecar);
+    }
+    else if (((currentcar->x) < policex) & (currentcar->x < 120)){
+        policecar_left(policecar);
+    }
+    else{    
+        car_stop(policecar);
+    }
+    
+    int currenty = currentcar->y;
+    if (((currentcar->y) < 73) & ((policecar->y) > currenty)){
+        car_up(policecar);  
+    }
+    else if (((currentcar->y) > 73) & ((policecar->y) < currenty)){
+        car_down(policecar);
+    }
+    else{
+        car_stop(policecar);
+    }
+}
+
+void collision(struct Car* policecar, struct Car* currentcar){
+    policecar->x = 45;
+    currentcar->x = 100;
+    policecar->y = 90;
+    currentcar->y = 90;
+}
+
+void check(struct Car* policecar, struct Car* currentcar){
+    int policex = policecar->x;
+    int policey = policecar->y;
+    int currentx = currentcar->x;
+    int currenty = currentcar->y;
+
+    if(((policex <= currentx) & (currentx <= (policex + 32))) & ((currenty-16)==policey)){
+        collision(policecar, currentcar);
+    }
+    else if(((policex <= currentx) & (currentx <= (policex + 32))) & (currenty==(policey-16))){
+        collision(policecar, currentcar);
+    }
+    else if(((policex+32) == currentx) & (((currenty-16)<=policey) & (policey<=currenty))){
+        collision(policecar, currentcar);
+    }
+    
 }
 
 void delay(unsigned int amount) {
@@ -317,7 +380,7 @@ int main() {
     car_init(&greencar, 45, 120, 16);
     struct Car policecar;
     car_init(&policecar, 45, 90, 32);
-    struct Car *currentcar = &redcar;
+    struct Car *currentcar = &greencar;
 
     int xscroll = 0;
 
@@ -328,30 +391,31 @@ int main() {
 
         if(button_pressed(BUTTON_A)){
             currentcar = &greencar;
+            currentcar->frame = 16;
         }
         else if(button_pressed(BUTTON_B)){
             currentcar = &redcar;
+            currentcar->frame = 0;
         }        
         if (button_pressed(BUTTON_RIGHT)) {
             if (car_right(currentcar)) {
                 xscroll++;
             }
-            car_right(&policecar);
         } else if (button_pressed(BUTTON_LEFT)) {
             if (car_left(currentcar)) {
                 xscroll--;
             }
             //right instead of left bc the police wants to catch the car
-            car_right(&policecar);
         } else if (button_pressed(BUTTON_UP)) {
             car_up(currentcar);
-            car_up(&policecar);
         } else if (button_pressed(BUTTON_DOWN)) { 
             car_down(currentcar);
-            car_down(&policecar);
         } else {
             car_stop(currentcar);
         }
+
+        move_police(&policecar, currentcar); 
+        check(&policecar, currentcar);        
 
         wait_vblank();
         *bg0_x_scroll = xscroll;
