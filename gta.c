@@ -3,6 +3,10 @@
 #include "cars.h"
 #include "text.h"
 
+#define _OPEN_SYS_ITOA_EXT
+#include <stdio.h>
+#include <stdlib.h>
+
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
@@ -414,8 +418,17 @@ int main() {
     *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;    
 
     setup_background();
+    
     char text [8] = "Lives: ";
     set_text(text, 0,0);    
+    
+    int lives = 3;
+    char slives[3];
+    itoa(lives, slives, 10);
+    
+    char livestext [2] = slives;
+    set_text(livestext, 55, 0);
+
     setup_sprite_image();
     sprite_clear();
 
