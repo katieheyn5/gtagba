@@ -369,7 +369,7 @@ void move_police(struct Car* policecar, struct Car* currentcar){
     }
 }
 
-int lives(int num_lives);
+int subtract(int num_lives);
 int reset(int num_lives);
 
 void collision(struct Car* policecar, struct Car* currentcar, int num_lives){
