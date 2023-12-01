@@ -370,27 +370,34 @@ void move_police(struct Car* policecar, struct Car* currentcar){
     }
 }
 
-void collision(struct Car* policecar, struct Car* currentcar){
+int lives(int num_lives);
+int reset(int num_lives);
+
+void collision(struct Car* policecar, struct Car* currentcar, int num_lives){
     policecar->x = 45;
     currentcar->x = 100;
     policecar->y = 90;
     currentcar->y = 90;
+    num_lives = lives(num_lives);
+    if (num_lives = 0) {
+        num_lives = reset(num_lives);
+    }
 }
 
-void check(struct Car* policecar, struct Car* currentcar){
+void check(struct Car* policecar, struct Car* currentcar, int lives){
     int policex = policecar->x;
     int policey = policecar->y;
     int currentx = currentcar->x;
     int currenty = currentcar->y;
 
     if(((policex <= currentx) & (currentx <= (policex + 32))) & ((currenty-16)==policey)){
-        collision(policecar, currentcar);
+        collision(policecar, currentcar, lives);
     }
     else if(((policex <= currentx) & (currentx <= (policex + 32))) & (currenty==(policey-16))){
-        collision(policecar, currentcar);
+        collision(policecar, currentcar, lives);
     }
     else if(((policex+32) == currentx) & (((currenty-16)<=policey) & (policey<=currenty))){
-        collision(policecar, currentcar);
+        collision(policecar, currentcar, lives);
     }
     
 }
@@ -463,7 +470,6 @@ int main() {
             if (car_left(currentcar)) {
                 xscroll--;
             }
-            //right instead of left bc the police wants to catch the car
         } else if (button_pressed(BUTTON_UP)) {
             car_up(currentcar);
         } else if (button_pressed(BUTTON_DOWN)) { 
@@ -473,7 +479,7 @@ int main() {
         }
 
         move_police(&policecar, currentcar); 
-        check(&policecar, currentcar);        
+        check(&policecar, currentcar, lives);        
 
         wait_vblank();
         *bg0_x_scroll = xscroll;
