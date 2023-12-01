@@ -345,6 +345,10 @@ void car_update(struct Car* car) {
     sprite_position(car->sprite, car->x, car->y);
 }
 
+void policecar_update(struct Car* car) {
+    sprite_position(car->sprite, car->x/2, car->y);
+}
+
 void move_police(struct Car* policecar, struct Car* currentcar){
     int policex = policecar->x;
     if (((currentcar->x) > policex) & (currentcar->x > 120)){
@@ -474,9 +478,10 @@ int main() {
     int lives = 3;
     char slives[3];
     citoa(lives, slives, 10);
-    
+   
+    char slives2 [8] = "3"; 
     //char livestext [2] = *slives;
-    set_text(slives, 55, 0);
+    set_text(slives2, 120, 0);
 
     setup_sprite_image();
     sprite_clear();
@@ -494,7 +499,7 @@ int main() {
     while (1) {
         car_update(&redcar);
         car_update(&greencar);
-        car_update(&policecar);
+        policecar_update(&policecar);
 
         if(button_pressed(BUTTON_A)){
             currentcar = &greencar;
