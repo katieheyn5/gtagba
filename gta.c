@@ -3,7 +3,6 @@
 #include "cars.h"
 #include "text.h"
 
-#define _OPEN_SYS_ITOA_EXT
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -378,7 +377,7 @@ void collision(struct Car* policecar, struct Car* currentcar, int num_lives){
     currentcar->x = 100;
     policecar->y = 90;
     currentcar->y = 90;
-    num_lives = lives(num_lives);
+    num_lives = subtract(num_lives);
     if (num_lives = 0) {
         num_lives = reset(num_lives);
     }
@@ -417,6 +416,49 @@ void set_text(char* str, int row, int col) {
     }   
 }
 
+// A utility function to reverse a string
+void reverse(char str[], int length)
+{
+    int start = 0;
+    int end = length - 1;
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        end--;
+        start++;
+    }
+}
+// Implementation of citoa()
+char* citoa(int num, char* str, int base)
+{
+    int i = 0;
+ 
+    /* Handle 0 explicitly, otherwise empty string is
+     * printed for 0 */
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+ 
+    // Process individual digits
+    while (num != 0) {
+        int rem = num % base;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        num = num / base;
+    }
+ 
+    // If number is negative, append '-'
+ 
+    str[i] = '\0'; // Append string terminator
+ 
+    // Reverse the string
+    reverse(str, i);
+ 
+    return str;
+}
+
 void delay(unsigned int amount) {
     for (int i = 0; i < amount * 10; i++);
 }
@@ -431,10 +473,10 @@ int main() {
     
     int lives = 3;
     char slives[3];
-    itoa(lives, slives, 10);
+    citoa(lives, slives, 10);
     
-    char livestext [2] = slives;
-    set_text(livestext, 55, 0);
+    //char livestext [2] = *slives;
+    set_text(slives, 55, 0);
 
     setup_sprite_image();
     sprite_clear();
