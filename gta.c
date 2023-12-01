@@ -281,7 +281,7 @@ int policecar_left(struct Car* car) {
 }
 
 int car_left(struct Car* car) {
-    car->move = 2;
+    car->move = 1;
 
     if (car->x < car->border) {
         return 1;
@@ -291,19 +291,32 @@ int car_left(struct Car* car) {
     }
 }
 
-int policecar_right(struct Car* car) {
-    car->move = 1;
+int policecar_right(struct Car* policecar, struct Car* currentcar) {
+    policecar->move = 1;
 
-    if (car->x > (SCREEN_WIDTH - 16 - car->border)) {
-        return 1;
-    } else {
-        car->x++;
-        return 0;
+    if (currentcar->move == 1)
+    {
+        if (policecar->x/2 > SCREEN_WIDTH - 49 - policecar->border) {
+            return 1;
+        }
+        else{
+            policecar->x++;
+            return 0;
+        }
+    }
+    else{
+        if (policecar->x/2 > SCREEN_WIDTH - 16 - policecar->border) {
+            return 1;
+        }
+        else{
+            policecar->x++;
+            return 0;
+        }
     }
 }
 
 int car_right(struct Car* car) {
-    car->move = 2;
+    car->move = 1;
 
     if (car->x > (SCREEN_WIDTH - 16 - car->border)) {
         return 1;
@@ -350,15 +363,15 @@ void policecar_update(struct Car* car) {
 }
 
 void move_police(struct Car* policecar, struct Car* currentcar){
-    int policex = policecar->x;
-    if (((currentcar->x) > policex) & (currentcar->x > 120)){
-        policecar_right(policecar);
+    int policex = policecar->x/2;
+    if (((currentcar->x) > policex)){
+        policecar_right(policecar, currentcar);
     }
-    else if (((currentcar->x) < policex) & (currentcar->x < 120)){
+    else if (((currentcar->x) < policex)){
         policecar_left(policecar);
     }
-    else{    
-        car_stop(policecar);
+    else{
+        policecar_right(policecar, currentcar);
     }
     
     int currenty = currentcar->y;
@@ -367,9 +380,6 @@ void move_police(struct Car* policecar, struct Car* currentcar){
     }
     else if (((currentcar->y) > 73) & ((policecar->y) < currenty)){
         car_down(policecar);
-    }
-    else{
-        car_stop(policecar);
     }
 }
 
@@ -388,7 +398,7 @@ void collision(struct Car* policecar, struct Car* currentcar, int num_lives){
 }
 
 void check(struct Car* policecar, struct Car* currentcar, int lives){
-    int policex = policecar->x;
+    int policex = policecar->x/2;
     int policey = policecar->y;
     int currentx = currentcar->x;
     int currenty = currentcar->y;
@@ -420,49 +430,6 @@ void set_text(char* str, int row, int col) {
     }   
 }
 
-// A utility function to reverse a string
-void reverse(char str[], int length)
-{
-    int start = 0;
-    int end = length - 1;
-    while (start < end) {
-        char temp = str[start];
-        str[start] = str[end];
-        str[end] = temp;
-        end--;
-        start++;
-    }
-}
-// Implementation of citoa()
-char* citoa(int num, char* str, int base)
-{
-    int i = 0;
- 
-    /* Handle 0 explicitly, otherwise empty string is
-     * printed for 0 */
-    if (num == 0) {
-        str[i++] = '0';
-        str[i] = '\0';
-        return str;
-    }
- 
-    // Process individual digits
-    while (num != 0) {
-        int rem = num % base;
-        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        num = num / base;
-    }
- 
-    // If number is negative, append '-'
- 
-    str[i] = '\0'; // Append string terminator
- 
-    // Reverse the string
-    reverse(str, i);
- 
-    return str;
-}
-
 void delay(unsigned int amount) {
     for (int i = 0; i < amount * 10; i++);
 }
@@ -472,16 +439,16 @@ int main() {
 
     setup_background();
     
-    char text [8] = "Lives: ";
-    set_text(text, 0,0);    
+    //char text [8] = "Lives: ";
+    //set_text(text, 0,0);    
     
     int lives = 3;
-    char slives[3];
-    citoa(lives, slives, 10);
+    char slives[12];
    
-    char slives2 [8] = "3"; 
+    //char slives2 [8] = "3"; 
     //char livestext [2] = *slives;
-    set_text(slives2, 120, 0);
+    sprintf(slives, "Lives: %d", lives);
+    set_text(slives, 0,0);
 
     setup_sprite_image();
     sprite_clear();
@@ -489,7 +456,7 @@ int main() {
     struct Car redcar;
     car_init(&redcar, 120, 80, 0);
     struct Car greencar;
-    car_init(&greencar, 45, 25, 16);
+    car_init(&greencar, 85, 25, 16);
     struct Car policecar;
     car_init(&policecar, 10, 90, 32);
     struct Car *currentcar = &redcar;
