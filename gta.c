@@ -383,21 +383,21 @@ void move_police(struct Car* policecar, struct Car* currentcar){
     }
 }
 
-int subtract(int num_lives);
-int reset(int num_lives);
+int subtract(int* num_lives);
+int reset(int* num_lives);
 
-void collision(struct Car* policecar, struct Car* currentcar, int num_lives){
+void collision(struct Car* policecar, struct Car* currentcar, int* num_lives){
     policecar->x = 45;
     currentcar->x = 100;
     policecar->y = 90;
     currentcar->y = 90;
-    num_lives = subtract(num_lives);
+    *num_lives = subtract(*num_lives);
     if (num_lives = 0) {
-        num_lives = reset(num_lives);
+        *num_lives = reset(*num_lives);
     }
 }
 
-void check(struct Car* policecar, struct Car* currentcar, int lives){
+void check(struct Car* policecar, struct Car* currentcar, int* lives){
     int policex = policecar->x/2;
     int policey = policecar->y;
     int currentx = currentcar->x;
@@ -493,7 +493,7 @@ int main() {
         }
 
         move_police(&policecar, currentcar); 
-        check(&policecar, currentcar, lives);        
+        check(&policecar, currentcar, &lives);        
 
         wait_vblank();
         *bg0_x_scroll = xscroll;
