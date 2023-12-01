@@ -197,14 +197,21 @@ volatile unsigned short* screen_block(unsigned long block) {
 }
 
 void setup_background() {
-    for (int i = 0; i < PALETTE_SIZE; i++) {
-        bg_palette[i] = background_palette[i];
-    }
+    //for (int i = 0; i < PALETTE_SIZE; i++) {
+        //bg_palette[i] = background_palette[i];
+    //}
 
-    for (int i = 0; i < PALETTE_SIZE; i++) {
-        bgtext_palette[i] = text_palette[i];
-    }
+    //for (int i = 0; i < PALETTE_SIZE; i++) {
+        //bgtext_palette[i] = text_palette[i];
+    //}
 
+    memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) background_palette, PALETTE_SIZE);
+    memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) background_data,
+            (background_width * background_height) / 2);
+
+    //memcpy16_dma((unsigned short*) bgtext_palette, (unsigned short*) text_palette, PALETTE_SIZE);
+    memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data, (text_width * text_height) / 2);
+    
     volatile unsigned short* dest = char_block(0);
     volatile unsigned short* dest1 = char_block(1);
     
