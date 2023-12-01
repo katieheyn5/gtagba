@@ -222,7 +222,13 @@ void setup_background() {
         (1 << 13) |      
         (0 << 14); 
     
-    *bg1_control = 0 | (1 << 2) | (0 << 6) | (1 << 7) | (24 << 8) | (1 << 13) | (0 << 14);
+    *bg1_control = 0 |
+        (1 << 2) | 
+        (0 << 6) |
+        (1 << 7) | 
+        (24 << 8) | 
+        (1 << 13) | 
+        (0 << 14);
 
     dest = screen_block(16);
     for (int i = 0; i < (gta_map_width * gta_map_height); i++) {
