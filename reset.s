@@ -2,12 +2,13 @@
 
 reset:
     mov r1, #1
-    mov r2, r0
+    ldr r3, [r0]
 top:
-    cmp r2, #3
+    cmp r3, #3
     beq done
-    add r2, r2, r1
+    add r3, r3, r1
     b top
 done:
-    mov r0, r2
+    str r3, [r0]
+    mov r0, r3
     mov pc, lr
