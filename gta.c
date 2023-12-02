@@ -1,3 +1,4 @@
+/* including all tile maps and backgrounds */
 #include "gta_map.h"
 #include "background.h"
 #include "cars.h"
@@ -23,6 +24,7 @@
 #define SPRITE_ENABLE 0x1000
 #define NUM_SPRITES 128
 
+/* setting background control registers */
 volatile unsigned short* bg0_control = (volatile unsigned short*) 0x4000008;
 volatile unsigned short* bg1_control = (volatile unsigned short*) 0x400000a;
 volatile unsigned short* bg2_control = (volatile unsigned short*) 0x400000c;
@@ -30,11 +32,13 @@ volatile unsigned short* bg3_control = (volatile unsigned short*) 0x400000e;
 
 #define PALETTE_SIZE 256
 
+/* setting up display control, palette, and button registers */
 volatile unsigned long* display_control = (volatile unsigned long*) 0x4000000;
 volatile unsigned short* bg_palette = (volatile unsigned short*) 0x5000000;
 volatile unsigned short* bgtext_palette = (volatile unsigned short*) 0x5000000;
 volatile unsigned short* buttons = (volatile unsigned short*) 0x04000130;
 
+/* making variables so the backgrounds can scroll */
 volatile short* bg0_x_scroll = (unsigned short*) 0x4000010;
 volatile short* bg0_y_scroll = (unsigned short*) 0x4000012;
 volatile short* bg1_x_scroll = (unsigned short*) 0x4000014;
@@ -44,10 +48,12 @@ volatile short* bg2_y_scroll = (unsigned short*) 0x400001a;
 volatile short* bg3_x_scroll = (unsigned short*) 0x400001c;
 volatile short* bg3_y_scroll = (unsigned short*) 0x400001e;
 
+/* variables for sprite memory and palette */
 volatile unsigned short* sprite_attribute_memory = (volatile unsigned short*) 0x7000000;
 volatile unsigned short* sprite_image_memory = (volatile unsigned short*) 0x6010000;
 volatile unsigned short* sprite_palette = (volatile unsigned short*) 0x5000200;
 
+/* defining buttons */
 #define BUTTON_A (1 << 0)
 #define BUTTON_B (1 << 1)
 #define BUTTON_SELECT (1 << 2)
@@ -61,23 +67,29 @@ volatile unsigned short* sprite_palette = (volatile unsigned short*) 0x5000200;
 
 volatile unsigned short* scanline_counter = (volatile unsigned short*) 0x4000006;
 
+/* defining dma */
 #define DMA_ENABLE 0x80000000
 #define DMA_16 0x00000000
 #define DMA_32 0x04000000
 
+/* dma source, destination, and count variables */
 volatile unsigned int* dma_source = (volatile unsigned int*) 0x40000D4;
 volatile unsigned int* dma_destination = (volatile unsigned int*) 0x40000D8;
 volatile unsigned int* dma_count = (volatile unsigned int*) 0x40000DC;
 
+/* function to keep track of dma data */
 void memcpy16_dma(unsigned short* dest, unsigned short* source, int amount) {
     *dma_source = (unsigned int) source;
     *dma_destination = (unsigned int) dest;
     *dma_count = amount | DMA_16 | DMA_ENABLE;
 }
 
+/* function to wait for vblank to update screen */
 void wait_vblank() {volatile unsigned short* sprite_palette = (volatile unsigned short*) 0x5000200;
     while (*scanline_counter < 160) { }
 }
+
+/* sprite structure */
 struct Sprite {
     unsigned short attribute0;
     unsigned short attribute1;
@@ -85,9 +97,11 @@ struct Sprite {
     unsigned short attribute3;
 };
 
+/* making sprites */
 struct Sprite sprites[NUM_SPRITES];
 int next_sprite_index = 0;
 
+/* enum for sprite sizes */
 enum SpriteSize {
     SIZE_8_8,
     SIZE_16_16,
@@ -103,6 +117,7 @@ enum SpriteSize {
     SIZE_32_64
 };
 
+/* function to initailize sprites */
 struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
     int horizontal_flip, int vertical_flip, int tile_index, int priority) {
     int index = next_sprite_index++;
@@ -145,10 +160,12 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
     return &sprites[index];
 }
 
+/* function used to update sprites */
 void sprite_update_all() {
     memcpy16_dma((unsigned short*) sprite_attribute_memory, (unsigned short*) sprites, NUM_SPRITES * 4);
 }
 
+/* function used to clear sprite data */
 void sprite_clear() {
     next_sprite_index = 0;
 
@@ -158,6 +175,7 @@ void sprite_clear() {
     }
 }
 
+/* function to set sprite position on the screen */
 void sprite_position(struct Sprite* sprite, int x, int y) {
     sprite->attribute0 &= 0xff00;
     sprite->attribute0 |= (y & 0xff);
@@ -165,23 +183,27 @@ void sprite_position(struct Sprite* sprite, int x, int y) {
     sprite->attribute1 |= (x & 0x1ff);
 }
 
+/* function to move sprites */
 void sprite_move(struct Sprite* sprite, int dx, int dy) {
     int y = sprite->attribute0 & 0xff;
     int x = sprite->attribute1 & 0x1ff;
     sprite_position(sprite, x + dx, y + dy);
 }
 
+/* function to set sprite offset */
 void sprite_set_offset(struct Sprite* sprite, int offset) {
     sprite->attribute2 &= 0xfc00;
     sprite->attribute2 |= (offset & 0x03ff);
 }
 
+/* function to take in sprite image */
 void setup_sprite_image() {
     memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) cars_palette, PALETTE_SIZE);
 
     memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) cars_data, (cars_width * cars_height) / 2);
 }
 
+/* function checking if a button has been pressed */
 unsigned char button_pressed(unsigned short button) {
     unsigned short pressed = *buttons & button;
     if (pressed == 0) {
@@ -191,28 +213,22 @@ unsigned char button_pressed(unsigned short button) {
     }
 }
 
+/* function to set up char block */
 volatile unsigned short* char_block(unsigned long block) {
     return (volatile unsigned short*) (0x6000000 + (block * 0x4000));
 }
 
+/* function to set up screen block */
 volatile unsigned short* screen_block(unsigned long block) {
     return (volatile unsigned short*) (0x6000000 + (block * 0x800));
 }
 
+/* function to set up the background */
 void setup_background() {
-    //for (int i = 0; i < PALETTE_SIZE; i++) {
-        //bg_palette[i] = background_palette[i];
-    //}
-
-    //for (int i = 0; i < PALETTE_SIZE; i++) {
-        //bgtext_palette[i] = text_palette[i];
-    //}
-
     memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) background_palette, PALETTE_SIZE);
     memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) background_data,
             (background_width * background_height) / 2);
 
-    //memcpy16_dma((unsigned short*) bgtext_palette, (unsigned short*) text_palette, PALETTE_SIZE);
     memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data, (text_width * text_height) / 2);
     
     volatile unsigned short* dest = char_block(0);
@@ -222,7 +238,6 @@ void setup_background() {
     for (int i = 0; i < ((background_width * background_height) / 2); i++) {
         dest[i] = image[i];
     }
-
 
     *bg0_control = 1 |   
         (0 << 2)  |       
@@ -251,6 +266,7 @@ void setup_background() {
     }
 }
 
+/* car struct */
 struct Car {
     struct Sprite* sprite;
     int x, y;
@@ -260,6 +276,7 @@ struct Car {
     int border;
 };
 
+/* initializing car sprite */
 void car_init(struct Car* car, int x, int y, int frame) {
     car->x = x;
     car->y = y;
@@ -269,6 +286,7 @@ void car_init(struct Car* car, int x, int y, int frame) {
     car->sprite = sprite_init(car->x, car->y, SIZE_32_16, 0, 0, car->frame, 0);
 }
 
+/* function to move the police car left */
 int policecar_left(struct Car* car) {
     car->move = 1;
 
@@ -280,6 +298,7 @@ int policecar_left(struct Car* car) {
     }
 }
 
+/* function to move the player's car left */
 int car_left(struct Car* car) {
     car->move = 1;
 
@@ -291,6 +310,7 @@ int car_left(struct Car* car) {
     }
 }
 
+/* function to move the police car right */
 int policecar_right(struct Car* policecar, struct Car* currentcar) {
     policecar->move = 1;
 
@@ -315,6 +335,7 @@ int policecar_right(struct Car* policecar, struct Car* currentcar) {
     }
 }
 
+/* function to move the player's car right */
 int car_right(struct Car* car) {
     car->move = 1;
 
@@ -326,6 +347,7 @@ int car_right(struct Car* car) {
     }
 }
 
+/* function to move the player's car up */
 int car_up(struct Car* car) {
    car->move = 1; 
 
@@ -337,6 +359,7 @@ int car_up(struct Car* car) {
     } 
 }
 
+/* function to move the player's car down */
 int car_down(struct Car* car) {
     car->move = 1;
 
@@ -348,20 +371,24 @@ int car_down(struct Car* car) {
     }
 }
 
+/* function to make the car stop moving */
 void car_stop(struct Car* car) {
     car->move = 0;
     car->counter = 7;
     sprite_set_offset(car->sprite, car->frame);
 }
 
+/* updates the position of the car */
 void car_update(struct Car* car) {
     sprite_position(car->sprite, car->x, car->y);
 }
 
+/* updates the position of the police car */
 void policecar_update(struct Car* car) {
     sprite_position(car->sprite, car->x/2, car->y);
 }
 
+/* function to move the police car based on the player's car position */
 void move_police(struct Car* policecar, struct Car* currentcar){
     int policex = policecar->x/2;
     if (((currentcar->x) > policex)){
@@ -383,22 +410,22 @@ void move_police(struct Car* policecar, struct Car* currentcar){
     }
 }
 
+/* initializing assembly functions to subtract lives for collisions and reset the lives when they get to 0 */
 void subtract(int* num_lives);
 void reset(int* num_lives);
 
+/* function to check for collisions and change lives accordingly */
 void collision(struct Car* policecar, struct Car* currentcar, int* num_lives){
     policecar->x = 45;
     currentcar->x = 100;
     policecar->y = 90;
     currentcar->y = 90;
 
-    //if(num_lives > 0) {
     subtract(num_lives);
-    //} else if (num_lives == 0) {
     reset(num_lives);     
-    //}
 }
 
+/* function to check if the police car and player car are actually colliding */
 void check(struct Car* policecar, struct Car* currentcar, int* lives){
     int policex = policecar->x/2;
     int policey = policecar->y;
@@ -419,21 +446,19 @@ void check(struct Car* policecar, struct Car* currentcar, int* lives){
     }    
 }
 
+/* function to put text on the screen */
 void set_text(char* str, int row, int col) {                    
     int index = row * 32 + col;
-
     int missing = 32; 
-
     volatile unsigned short* ptr = screen_block(24);
-
     while (*str) {
         ptr[index] = *str - missing;
-
         index++;
         str++;
     }   
 }
 
+/* function to delay the background scrolling */
 void delay(unsigned int amount) {
     for (int i = 0; i < amount * 10; i++);
 }
@@ -492,14 +517,10 @@ int main() {
         }
 
         move_police(&policecar, currentcar); 
-        //check(&policecar, currentcar, &lives);        
 
         wait_vblank();
         *bg0_x_scroll = xscroll;
         sprite_update_all();
-
-        //sprintf(slives, "Lives: %d", lives);
-        //set_text(slives, 0,0);
 
         delay(100);
     }
