@@ -391,9 +391,13 @@ void collision(struct Car* policecar, struct Car* currentcar, int* num_lives){
     currentcar->x = 100;
     policecar->y = 90;
     currentcar->y = 90;
-    subtract(num_lives);
-    if (num_lives = 0) {
-        reset(num_lives);
+
+    if(num_lives > 0) {
+        subtract(num_lives);
+    } else {
+        reset(num_lives);     
+        //sprintf(slives, "Lives: %d", num_lives);
+        //set_text(slives, 0,0);
     }
 }
 

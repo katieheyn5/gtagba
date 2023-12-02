@@ -1,13 +1,13 @@
 .global reset
 
 reset:
-    mov r1, #1
+    mov r1, #3
     ldr r3, [r0]
-top:
-    cmp r3, #3
-    beq done
+    cmp r3, #0
+    beq add
+    bne done
+add:
     add r3, r3, r1
-    b top
 done:
     str r3, [r0]
     mov r0, r3
