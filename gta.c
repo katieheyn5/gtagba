@@ -498,7 +498,10 @@ int main() {
         wait_vblank();
         *bg0_x_scroll = xscroll;
         sprite_update_all();
-        
+
+        sprintf(slives, "Lives: %d", lives);
+        set_text(slives, 0,0);
+
         delay(100);
     }
 }
