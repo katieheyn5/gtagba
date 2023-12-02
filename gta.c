@@ -414,7 +414,9 @@ void check(struct Car* policecar, struct Car* currentcar, int* lives){
     else if(((policex+32) == currentx) & (((currenty-16)<=policey) & (policey<=currenty))){
         collision(policecar, currentcar, lives);
     }
-    
+    else if(((currentx+32) == policex) & (((currenty-16)<=policey) & (policey<=currenty))){
+        collision(policecar, currentcar, lives);
+    }    
 }
 
 void set_text(char* str, int row, int col) {                    
@@ -448,9 +450,9 @@ int main() {
     sprite_clear();
 
     struct Car redcar;
-    car_init(&redcar, 120, 80, 0);
+    car_init(&redcar, 90, 90, 0);
     struct Car greencar;
-    car_init(&greencar, 85, 25, 16);
+    car_init(&greencar, 90, 25, 16);
     struct Car policecar;
     car_init(&policecar, 10, 90, 32);
     struct Car *currentcar = &redcar;
