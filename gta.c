@@ -447,8 +447,8 @@ int main() {
    
     //char slives2 [8] = "3"; 
     //char livestext [2] = *slives;
-    sprintf(slives, "Lives: %d", lives);
-    set_text(slives, 0,0);
+    //sprintf(slives, "Lives: %d", lives);
+    //set_text(slives, 0,0);
 
     setup_sprite_image();
     sprite_clear();
@@ -467,6 +467,9 @@ int main() {
         car_update(&redcar);
         car_update(&greencar);
         policecar_update(&policecar);
+        check(&policecar, currentcar, &lives);
+        sprintf(slives, "Lives: %d", lives);
+        set_text(slives, 0,0);
 
         if(button_pressed(BUTTON_A)){
             currentcar = &greencar;
@@ -493,7 +496,7 @@ int main() {
         }
 
         move_police(&policecar, currentcar); 
-        check(&policecar, currentcar, &lives);        
+        //check(&policecar, currentcar, &lives);        
 
         wait_vblank();
         *bg0_x_scroll = xscroll;
