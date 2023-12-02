@@ -392,13 +392,11 @@ void collision(struct Car* policecar, struct Car* currentcar, int* num_lives){
     policecar->y = 90;
     currentcar->y = 90;
 
-    if(num_lives > 0) {
-        subtract(num_lives);
-    } else {
-        reset(num_lives);     
-        //sprintf(slives, "Lives: %d", num_lives);
-        //set_text(slives, 0,0);
-    }
+    //if(num_lives > 0) {
+    subtract(num_lives);
+    //} else if (num_lives == 0) {
+    reset(num_lives);     
+    //}
 }
 
 void check(struct Car* policecar, struct Car* currentcar, int* lives){
@@ -443,16 +441,8 @@ int main() {
 
     setup_background();
     
-    //char text [8] = "Lives: ";
-    //set_text(text, 0,0);    
-    
     int lives = 3;
     char slives[12];
-   
-    //char slives2 [8] = "3"; 
-    //char livestext [2] = *slives;
-    //sprintf(slives, "Lives: %d", lives);
-    //set_text(slives, 0,0);
 
     setup_sprite_image();
     sprite_clear();
@@ -506,8 +496,8 @@ int main() {
         *bg0_x_scroll = xscroll;
         sprite_update_all();
 
-        sprintf(slives, "Lives: %d", lives);
-        set_text(slives, 0,0);
+        //sprintf(slives, "Lives: %d", lives);
+        //set_text(slives, 0,0);
 
         delay(100);
     }

@@ -3,7 +3,7 @@
 subtract:
     mov r1, #1
     ldr r2, [r0]
-    cmp r2, #0
+    cmp r2, #-1
     bgt sub
     b done
 sub:
